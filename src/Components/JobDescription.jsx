@@ -21,6 +21,7 @@ function JobDescriptionPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // ✅ Loading state
   const [jobData, setJobData] = useState(null);
+
   const { Id } = useParams(); // ✅ Get Job ID from URL
   // console.log(Id);
   // const cleanData = DOMPurify.sanitize(jobData?.Description); // Removes harmful scripts
@@ -38,6 +39,24 @@ function JobDescriptionPage() {
     }, {});
   };
   const cleanData = sanitizeJobData(jobData); // Sanitize all fields
+
+  const removePTags = (data) => {
+    if (typeof data === "string") {
+      // Remove all <p> and </p> tags from the string
+      return data.replace(/<p>/g, "").replace(/<\/p>/g, "");
+    }
+    if (Array.isArray(data)) {
+      return data.map(removePTags);
+    }
+    if (typeof data === "object" && data !== null) {
+      const processed = {};
+      for (const key in data) {
+        processed[key] = removePTags(data[key]);
+      }
+      return processed;
+    }
+    return data;
+  };
 
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -91,6 +110,7 @@ function JobDescriptionPage() {
         );
 
         setJobData(response.data);
+        console.log("get", response);
       } catch (error) {
         console.error(
           "Error fetching job:",
@@ -114,15 +134,17 @@ function JobDescriptionPage() {
         return;
       }
 
+      // Process jobData to remove <p> tags from all fields
+      const processedData = removePTags(jobData);
+
       await axios.put(
         api,
-        jobData, // ✅ Send updated job data to backend
+        processedData, // Send the processed data without <p> tags
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Job details updated successfully!");
       setIsEditing(false);
-      // fetchJob(); // ✅ Fetch updated data after saving
     } catch (error) {
       console.error(
         "Error updating job:",
@@ -131,7 +153,6 @@ function JobDescriptionPage() {
       alert("Failed to update job. Please try again.");
     }
   };
-
   // ✅ Handle changes when editing
   // const handleChange = (field, value) => {
   //   setJobData((prev) => ({ ...prev, [field]: value }));
@@ -268,17 +289,11 @@ function JobDescriptionPage() {
             {/* Display City, State, Country, and Status in one line */}
             <span style={{ whiteSpace: "nowrap" }}>
               <strong>City:</strong>
-              <span
-                dangerouslySetInnerHTML={{ __html: cleanData.address?.City }}
-              />
+              <span dangerouslySetInnerHTML={{ __html: cleanData.City }} />
               <strong> State:</strong>{" "}
-              <span
-                dangerouslySetInnerHTML={{ __html: cleanData.address?.State }}
-              />
+              <span dangerouslySetInnerHTML={{ __html: cleanData.State }} />
               <strong> Country:</strong>{" "}
-              <span
-                dangerouslySetInnerHTML={{ __html: cleanData.address?.Country }}
-              />
+              <span dangerouslySetInnerHTML={{ __html: cleanData.Country }} />
             </span>
           </>
         )}
@@ -419,7 +434,7 @@ function JobDescriptionPage() {
           />
         ) : (
           <div
-            dangerouslySetInnerHTML={{ __html: cleanData.ExperienceRequired }}
+            dangerouslySetInnerHTML={{ __html: cleanData.Experience }}
             className="text-gray-700"
           />
         )}
@@ -472,7 +487,7 @@ function JobDescriptionPage() {
           />
         ) : (
           <div
-            dangerouslySetInnerHTML={{ __html: cleanData.SalaryRange }}
+            dangerouslySetInnerHTML={{ __html: cleanData.Salary }}
             className="text-gray-700"
           />
         )}
@@ -532,7 +547,7 @@ function JobDescriptionPage() {
           />
         ) : (
           <div
-            dangerouslySetInnerHTML={{ __html: cleanData.skillsRequired }}
+            dangerouslySetInnerHTML={{ __html: cleanData.SkillsRequired }}
             className="text-gray-700"
           />
         )}

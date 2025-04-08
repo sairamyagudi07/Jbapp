@@ -20,6 +20,8 @@ function ApplicationForm() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEducationExpanded, setIsEducationExpanded] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFileName, setUploadedFileName] = useState("");
   const { Id } = useParams(); // ✅ Get Job ID from URL
   // console.log(Id);
 
@@ -64,27 +66,54 @@ function ApplicationForm() {
   //   }
   // };
 
+  // const handleFileChange = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+
+  //   console.log("Selected File:", file);
+
+  //   const fileType = file.name.split(".").pop().toLowerCase();
+  //   if (fileType === "pdf") {
+  //     await extractDataFromPDF(file);
+  //   } else if (fileType === "docx") {
+  //     await extractDataFromDocx(file);
+  //   } else {
+  //     alert("Only PDF or DOCX files are supported!");
+  //     return;
+  //   }
+
+  //   // ✅ Store file in state separately (without replacing resumeUrl)
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     resumeFile: file, // Keep the actual file in state
+  //   }));
+  // };
+
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    console.log(file);
+    setUploadedFile(file); // ✅ Store file separately
+    setUploadedFileName(file.name);
 
     const fileType = file.name.split(".").pop().toLowerCase();
+    let extractedText = "";
+
     if (fileType === "pdf") {
-      extractDataFromPDF(file);
+      extractedText = await extractDataFromPDF(file);
     } else if (fileType === "docx") {
-      extractDataFromDocx(file);
+      extractedText = await extractDataFromDocx(file);
     } else {
       alert("Only PDF or DOCX files are supported!");
       return;
     }
 
-    // Store file object instead of file name
     setFormData((prevData) => ({
       ...prevData,
-      resumeUrl: file,
+      extractedText, // Store extracted text
     }));
+
+    console.log("Updated FormData:", { extractedText });
   };
 
   // ✅ IMPROVED PDF TEXT EXTRACTION (Handles fragments better)
@@ -190,13 +219,32 @@ function ApplicationForm() {
       const apiUrl = "http://156.67.111.32:3120/api/jobPortal/jobApplication";
 
       const formPayload = new FormData();
+
+      console.log("Before submission, formData:", formData);
+
+      // ✅ Ensure resumeUrl is appended separately
+      if (uploadedFile) {
+        formPayload.append("resumeUrl", uploadedFile);
+      } else {
+        console.error("resumeUrl file is missing:", uploadedFile);
+      }
+
+      // ✅ Append extracted text separately
+      if (formData.extractedText) {
+        formPayload.append("extractedText", formData.extractedText);
+      }
+
+      // ✅ Append other form fields
       Object.keys(formData).forEach((key) => {
-        if (key === "resumeUrl") {
-          formPayload.append("resumeUrl", formData.resumeUrl); // Append file as binary
-        } else {
+        if (key !== "resumeUrl" && key !== "extractedText") {
           formPayload.append(key, formData[key]);
         }
       });
+
+      console.log("Submitting FormData:");
+      for (let pair of formPayload.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       const response = await axios.post(apiUrl, formPayload, {
         headers: {
@@ -211,8 +259,9 @@ function ApplicationForm() {
           fullName: "",
           email: "",
           phoneNumber: "",
-          jobId: Id,
-          resumeUrl: null, // Reset file field
+          jobId: 1,
+          extractedText: "",
+          resumeFileName: "",
           country: "",
           state: "",
           city: "",
@@ -224,7 +273,11 @@ function ApplicationForm() {
           offerInHand: "",
           noticePeriod: "",
           totalRelevantExperience: "",
+          profileLink: "",
         });
+
+        setUploadedFile(null);
+        setUploadedFileName(""); // Reset file name in UI
       }
     } catch (error) {
       console.error("Error submitting application:", error);
