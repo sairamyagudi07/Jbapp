@@ -5,7 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useState } from "react";
-import Navbar from "./components/Navbar.jsx";
+import Navbar from "./components/Navbar";
 import JobListings from "./pages/JobListings";
 import ApplicationForm from "./components/ApplicationForm";
 import JobDescriptionPage from "./components/JobDescription";
