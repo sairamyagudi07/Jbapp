@@ -18,9 +18,10 @@ function JobDescriptionPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [jobData, setJobData] = useState(null);
-  
-  
-  const { Id } = useParams();
+
+  const { id } = useParams();
+  console.log("Route params:", useParams());
+
   const sanitizeJobData = (data) => {
     if (!data) return {};
 
@@ -92,10 +93,15 @@ function JobDescriptionPage() {
   };
 
   useEffect(() => {
-    console.log("Inside useEffect");
-    console.log("Job ID from URL:", Id);
-  
     const fetchJob = async () => {
+      console.log("Current ID:", id); // Debug log to see the ID value
+
+      if (!id) {
+        console.warn("No job ID provided");
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
         const token = localStorage.getItem("authToken");
@@ -104,36 +110,49 @@ function JobDescriptionPage() {
           navigate("/login");
           return;
         }
-  
-        console.log("Making API request...");
+
         const response = await axios.get(
-          `http://156.67.111.32:3120/api/jobPortal/getJobPostingById/${Id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `http://156.67.111.32:3120/api/jobPortal/getJobPostingById/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
-  
+
         if (response.data) {
           setJobData(response.data);
-          console.log("Job data loaded successfully:", response.data);
         } else {
-          alert("No job data found.");
+          console.error("No data received from API");
+          alert("Failed to load job data. Please try again later.");
         }
       } catch (error) {
-        console.error("Error fetching job:", error.response?.data || error.message);
-        alert(`Failed to load job data: ${error.response?.data?.message || error.message}`);
+        console.error("Error fetching job:", error);
+        if (error.response) {
+          if (error.response.status === 401) {
+            alert("Session expired. Please log in again.");
+            navigate("/login");
+          } else {
+            alert(
+              `Error: ${
+                error.response.data?.message || "Failed to load job data"
+              }`
+            );
+          }
+        } else {
+          alert("Network error. Please check your connection and try again.");
+        }
       } finally {
         setIsLoading(false);
       }
     };
-  
-    if (Id) {
-      fetchJob();
-    } else {
-      console.warn("Job ID not found in route parameters.");
-    }
-  }, [Id]);
-  
+
+    fetchJob();
+  }, [id, navigate]);
+
   // useEffect(() => {
-  //   console.log("Route param ID:", Id);
+  //   console.log("Route param ID:", id);
   //   const fetchJob = async () => {
   //     setIsLoading(true);
   //     try {
@@ -143,9 +162,9 @@ function JobDescriptionPage() {
   //         navigate("/login"); // Redirect to login
   //         return;
   //       }
-     
+
   //       const response = await axios.get(
-  //         `http://156.67.111.32:3120/api/jobPortal/getJobPostingById/${Id}`,
+  //         `http://156.67.111.32:3120/api/jobPortal/getJobPostingById/${id}`,
   //         { headers: { Authorization: `Bearer ${token}` } }
   //       );
   //       if (response.data) {
@@ -161,13 +180,13 @@ function JobDescriptionPage() {
   //       setIsLoading(false);
   //     }
   //   };
-  
-  //   if (Id) fetchJob();
-  // }, [Id]);
+
+  //   if (id) fetchJob();
+  // }, [id]);
   // Handle Save Changes (POST API)
   const handleSave = async () => {
     try {
-      const api = `http://156.67.111.32:3120/api/jobportal/updateJobPosting/${Id}`;
+      const api = `http://156.67.111.32:3120/api/jobportal/updateJobPosting/${id}`;
       const token = localStorage.getItem("authToken");
 
       if (!token) {
@@ -194,8 +213,8 @@ function JobDescriptionPage() {
       alert("Failed to update job. Please try again.");
     }
   };
-  const handleApply = (Id) => {
-    navigate(`/jobapply/${Id}`);
+  const handleApply = (id) => {
+    navigate(`/jobapply/${id}`);
   };
 
   // If still loading, show a spinner or message
@@ -216,7 +235,7 @@ function JobDescriptionPage() {
           Job not found or data unavailable.
         </p>
       </div>
-    );    
+    );
   }
   return (
     <div className="flex flex-col min-h-screen bg-white py-20">
@@ -331,7 +350,7 @@ function JobDescriptionPage() {
         </button>
         <button
           className="bg-blue-600 text-white px-10 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto"
-          onClick={() => handleApply(Id)}
+          onClick={() => handleApply(id)}
         >
           Apply
         </button>
@@ -505,7 +524,6 @@ function JobDescriptionPage() {
             dangerouslySetInnerHTML={{ __html: cleanData.JobResponsibilities }}
             className="text-gray-700"
           />
-          
         )}
       </div>
 
