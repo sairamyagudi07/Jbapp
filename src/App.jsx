@@ -5,14 +5,14 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useState } from "react";
-import Navbar from "./components/Navbar.jsx";
-import JobListings from "./pages/JobListings.jsx";
-import ApplicationForm from "./components/ApplicationForm.jsx";
-import JobDescriptionPage from "./components/JobDescription.jsx";
-import JobPosting from "./pages/AddJobs.jsx";
-import Login from "./pages/Login.jsx";
-import JobApplicants from "./pages/GetApplicant.jsx";
-import Homepage from "./pages/Home.jsx";
+import Navbar from "./components/Navbar";
+import JobListings from "./pages/JobListings";
+import ApplicationForm from "./components/ApplicationForm";
+import JobDescriptionPage from "./components/JobDescription";
+import JobPosting from "./pages/AddJobs";
+import Login from "./pages/Login";
+import JobApplicants from "./pages/GetApplicant";
+import Homepage from "./pages/Home";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
