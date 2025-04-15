@@ -151,38 +151,6 @@ function JobDescriptionPage() {
     fetchJob();
   }, [id, navigate]);
 
-  // useEffect(() => {
-  //   console.log("Route param ID:", id);
-  //   const fetchJob = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       if (!token) {
-  //         alert("No authentication token found. Please log in again.");
-  //         navigate("/login"); // Redirect to login
-  //         return;
-  //       }
-
-  //       const response = await axios.get(
-  //         `http://156.67.111.32:3120/api/jobPortal/getJobPostingById/${id}`,
-  //         { headers: { Authorization: `Bearer ${token}` } }
-  //       );
-  //       if (response.data) {
-  //         setJobData(response.data);
-  //         console.log("Job data loaded successfully:", response.data);
-  //       } else {
-  //         alert("No job data found.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching job:", error.response?.data || error.message);
-  //       alert(`Failed to load job data: ${error.response?.data?.message || error.message}`);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   if (id) fetchJob();
-  // }, [id]);
   // Handle Save Changes (POST API)
   const handleSave = async () => {
     try {
@@ -219,13 +187,13 @@ function JobDescriptionPage() {
 
   // If still loading, show a spinner or message
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-screen">
-  //       <img src="/Spinner.gif" alt="Loading..." className="w-20 h-20" />
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <img src="/Spinner.gif" alt="Loading..." className="w-20 h-20" />
+      </div>
+    );
+  }
 
   // If no data found, show an error message
   if (!jobData) {
@@ -521,8 +489,9 @@ function JobDescriptionPage() {
           />
         ) : (
           <div
+            className="prose"
             dangerouslySetInnerHTML={{ __html: cleanData.JobResponsibilities }}
-            className="text-gray-700"
+            // className="text-gray-700"
           />
         )}
       </div>
@@ -562,8 +531,9 @@ function JobDescriptionPage() {
           />
         ) : (
           <div
+            className="prose"
             dangerouslySetInnerHTML={{ __html: cleanData.SkillsRequired }}
-            className="text-gray-700"
+            // className="text-gray-700"
           />
         )}
       </div>

@@ -12,7 +12,7 @@ const JobApplicants = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [error, setError] = useState(null);
-  const { Id } = useParams();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -28,6 +28,7 @@ const JobApplicants = () => {
       try {
         const response = await axios.get(api, {
           headers: { Authorization: `Bearer ${token}` },
+          "Content-Type": "application/json",
         });
 
         if (
@@ -85,7 +86,7 @@ const JobApplicants = () => {
                   </th>
                   <th className="border p-2 text-left">Job Applied</th>
                   <th className="border p-2 text-left hidden md:table-cell">
-                    Job ID
+                    Job id
                   </th>
                   <th className="border p-2 text-left">Resume</th>
                 </tr>
@@ -100,7 +101,7 @@ const JobApplicants = () => {
                       <td className="border p-2">{app?.JobTitle || "N/A"}</td>
                       <td className="border p-2 hidden md:table-cell text-center">
                         <span className="px-2 py-1 rounded bg-blue-500 text-white text-xs sm:text-sm">
-                          {app?.JobId || "Unknown"}
+                          {app?.Jobid || "Unknown"}
                         </span>
                       </td>
                       <td className="border p-2 flex items-center gap-2">
