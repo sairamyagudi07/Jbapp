@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
- function Navbar() {
+const Navbar = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -19,7 +19,6 @@ import { useEffect, useState } from "react";
 
   return (
     <nav className="bg-gradient-to-r from-[#7c3aed] to-[#6366f1] text-white px-6 py-3 shadow-md flex items-center justify-between w-full fixed top-0 z-50">
-      
       {/* Left Section: Logo + Navigation */}
       <div className="flex items-center gap-6">
         <span className="text-xl font-bold">JobNest</span>
@@ -118,7 +117,6 @@ import { useEffect, useState } from "react";
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;
-
